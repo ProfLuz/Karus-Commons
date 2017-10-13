@@ -30,12 +30,58 @@ import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.mockito.Mockito.*;
 
 
 @TestInstance(PER_CLASS)
 public class VectorsTest {
     
     private static final double ROUNDING_ERROR = 0.0000000000000001;
+    
+    
+    @Test
+    public void random() {
+        Vector vector = mock(Vector.class);
+        
+        Vectors.random(vector);
+        
+        verify(vector).setX(anyDouble());
+        verify(vector).setY(anyDouble());
+        verify(vector).setZ(anyDouble());
+        verify(vector).normalize();
+    }
+    
+    
+    @Test
+    public void randomCircle() {
+        Vector vector = mock(Vector.class);
+        
+        Vectors.randomCircle(vector);
+        
+        verify(vector).setX(anyDouble());
+        verify(vector).setY(0);
+        verify(vector).setZ(anyDouble());
+    }
+    
+        
+    @Test
+    public void rotateVector_radians() {
+        Vector vector = Vectors.rotate(new Vector(10, 10, 10), 1, 2, 3);
+        
+        assertEquals(-7.893858690333731, vector.getX(), ROUNDING_ERROR);
+        assertEquals(4.167373192795026, vector.getY(), ROUNDING_ERROR);
+        assertEquals(-14.843180105658494, vector.getZ(), ROUNDING_ERROR);
+    }
+    
+    
+    @Test
+    public void rotateVector_Location() {
+        Vector vector = Vectors.rotate(new Vector(10, 10, 10), new Location(null, 0, 0, 0, 10, 20));
+        
+        assertEquals(-12.073748387926274, vector.getX(), ROUNDING_ERROR);
+        assertEquals(5.976724774602398, vector.getY(), ROUNDING_ERROR);
+        assertEquals(10.885924895648582, vector.getZ(), ROUNDING_ERROR);
+    }
     
             
     @Test
@@ -65,26 +111,6 @@ public class VectorsTest {
         assertEquals(-2.9505041818708264, vector.getX(), ROUNDING_ERROR);
         assertEquals(-13.830926399658221, vector.getY(), ROUNDING_ERROR);
         assertEquals(10.0, vector.getZ(), ROUNDING_ERROR);
-    }
-    
-    
-    @Test
-    public void rotateVector_radians() {
-        Vector vector = Vectors.rotateVector(new Vector(10, 10, 10), 1, 2, 3);
-        
-        assertEquals(-7.893858690333731, vector.getX(), ROUNDING_ERROR);
-        assertEquals(4.167373192795026, vector.getY(), ROUNDING_ERROR);
-        assertEquals(-14.843180105658494, vector.getZ(), ROUNDING_ERROR);
-    }
-    
-    
-    @Test
-    public void rotateVector_Location() {
-        Vector vector = Vectors.rotateVector(new Vector(10, 10, 10), new Location(null, 0, 0, 0, 10, 20));
-        
-        assertEquals(-12.073748387926274, vector.getX(), ROUNDING_ERROR);
-        assertEquals(5.976724774602398, vector.getY(), ROUNDING_ERROR);
-        assertEquals(10.885924895648582, vector.getZ(), ROUNDING_ERROR);
     }
     
     

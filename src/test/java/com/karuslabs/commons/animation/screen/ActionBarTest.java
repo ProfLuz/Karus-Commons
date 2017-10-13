@@ -40,7 +40,7 @@ import static org.mockito.Mockito.*;
 public class ActionBarTest {
     
     private BiFunction<Player, Context, String> function = when(mock(BiFunction.class).apply(any(), any())).thenReturn("value").getMock();
-    private ActionBar bar = ActionBar.builder(null).function(function).build();
+    private ActionBar bar = ActionBar.builder(null).function(() -> function).build();
     private StubSpigot spigot = new StubSpigot();
     private Player player = when(mock(Player.class).spigot()).thenReturn(spigot).getMock();
     

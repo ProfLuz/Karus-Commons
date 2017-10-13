@@ -21,26 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.util.function;
+package com.karuslabs.commons.animation.particles.effects;
 
-import java.util.function.Function;
+import org.bukkit.util.Vector;
+
+import static java.lang.Math.PI;
 
 
-@FunctionalInterface
-public interface CheckedFunction<T, R, E extends Exception> {
+class Constants {
     
-    public R apply(T t) throws E;
+    static final Vector ANGULAR_VELOCITY = new Vector(PI / 200, PI / 170, PI / 155);
     
-    
-    public static <T, R, E extends Exception> Function<T, R> uncheck(CheckedFunction<T, R, E> function) {
-        return t -> {
-            try {
-                return function.apply(t);
-                
-            } catch (Exception e) {
-                throw new UncheckedFunctionException(e);
-            }
-        };
-    }
+    static final Vector NONE = new Vector();
     
 }

@@ -21,32 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.animation.particles.tasks;
+package com.karuslabs.commons.animation.particles.effects;
 
 import com.karuslabs.commons.animation.particles.Particles;
 import com.karuslabs.commons.animation.particles.effect.*;
 import com.karuslabs.commons.world.BoundLocation;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.bukkit.Location;
-import org.bukkit.util.Vector;
 
-import static java.lang.Math.pow;
+import static com.karuslabs.commons.world.Vectors.randomCircle;
 
 
-public class Arc implements MemoisableTask<BoundLocation, BoundLocation> {
+public class Smoke implements Task<Smoke, BoundLocation, BoundLocation> {
     
     private Particles particles;
-    private int total = 100;
-    private float height = 2;
+    private int perIteration;
+    private double width;
+    private double height;
     
     
-    public Arc(Particles particles) {
-        this(particles, 100, 2);
+    public Smoke(Particles particles) {
+        this(particles, 20, 0.6, 2);
     }
     
-    public Arc(Particles particles, int total, float height) {
+    public Smoke(Particles particles, int perIteration, double width, double height) {
         this.particles = particles;
-        this.total = total;
+        this.perIteration = perIteration;
+        this.width = width;
         this.height = height;
     }
     
@@ -54,22 +57,18 @@ public class Arc implements MemoisableTask<BoundLocation, BoundLocation> {
     @Override
     public void render(Context<BoundLocation, BoundLocation> context) {
         Location location = context.getOrigin().getLocation();
-        Location target = context.getTarget().getLocation();
-
-        Vector link = target.toVector().subtract(location.toVector());
-        float length = (float) link.length();
-        float pitch = (float) (4 * height / pow(length, 2));
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         
-        for (int i = 0; i < total; i++) {
-            Vector vector = link.clone().normalize().multiply((float) length * i / total);
-            float x = ((float) i / total) * length - length / 2;
-            float y = (float) (-pitch * pow(x, 2) + height);
-            location.add(vector).add(0, y, 0);
-            
+        for (int i = 0; i < perIteration; i += particles.getAmount()) {
+            location.add(randomCircle(context.getVector()).multiply(random.nextDouble(0, 0.6)));
+            location.add(0, random.nextDouble(0, 2), 0);
             context.render(particles, location);
-            
-            location.subtract(0, y, 0).subtract(vector);
         }
+    }
+
+    @Override
+    public Smoke get() {
+        return this;
     }
     
 }

@@ -21,26 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.util.function;
+package com.karuslabs.commons.animation.particles.effects;
 
-import java.util.function.Function;
+import com.karuslabs.commons.animation.particles.Particles;
+import com.karuslabs.commons.animation.particles.effect.*;
+import com.karuslabs.commons.world.BoundLocation;
+
+import org.bukkit.Location;
 
 
-@FunctionalInterface
-public interface CheckedFunction<T, R, E extends Exception> {
+public class Composite implements Task<Composite, BoundLocation, BoundLocation> {
     
-    public R apply(T t) throws E;
+    private Particles[] particles;
     
     
-    public static <T, R, E extends Exception> Function<T, R> uncheck(CheckedFunction<T, R, E> function) {
-        return t -> {
-            try {
-                return function.apply(t);
-                
-            } catch (Exception e) {
-                throw new UncheckedFunctionException(e);
-            }
-        };
+    public Composite(Particles... particles) {
+        this.particles = particles;
+    }
+    
+    
+    @Override
+    public void render(Context<BoundLocation, BoundLocation> context) {
+        Location location = context.getOrigin().getLocation();
+        for (Particles particle : particles) {
+           context.render(particle, location);
+        }
+    }
+
+    @Override
+    public Composite get() {
+        return this;
     }
     
 }

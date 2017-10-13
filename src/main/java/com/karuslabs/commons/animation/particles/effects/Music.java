@@ -21,13 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.animation.particles.effect;
+package com.karuslabs.commons.animation.particles.effects;
 
-import com.karuslabs.commons.util.function.Memoisable;
+import com.karuslabs.commons.animation.particles.Particles;
+import com.karuslabs.commons.animation.particles.effect.*;
 import com.karuslabs.commons.world.BoundLocation;
 
+import org.bukkit.Location;
 
-@FunctionalInterface
-public interface MemoisableTask<Origin extends BoundLocation, Target extends BoundLocation> extends Task<Origin, Target>, Memoisable {
+import static java.lang.Math.*;
+
+
+public class Music implements Task<Music, BoundLocation, BoundLocation> {
+    
+    private Particles particles;
+    private double radials;
+    private float radius;
+    
+    
+    public Music(Particles particles) {
+        this(particles, PI / 8, 0.4F);
+    }
+    
+    public Music(Particles particles, double radials, float radius) {
+        this.particles = particles;
+        this.radials = radials;
+        this.radius = radius;
+    }
+    
+    
+    @Override
+    public void render(Context<BoundLocation, BoundLocation> context) {
+        Location location = context.getOrigin().getLocation();
+        long current = context.getCurrent();
+        
+        location.add(cos(radials * current) * radius, 1.9f, sin(radials* current) * radius);
+        context.render(particles, location);
+    }
+
+    @Override
+    public Music get() {
+        return this;
+    }
     
 }

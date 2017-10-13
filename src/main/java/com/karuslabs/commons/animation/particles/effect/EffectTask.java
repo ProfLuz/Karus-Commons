@@ -35,14 +35,15 @@ import org.bukkit.util.Vector;
 
 class EffectTask<Origin extends BoundLocation, Target extends BoundLocation> extends ScheduledPromiseTask<Void> implements Context<Origin, Target> {
 
-    protected Task<Origin, Target> task;
+    protected Task<Task, Origin, Target> task;
     protected BiConsumer<Particles, Location> render;
     protected Origin origin;
     protected Target target;
     protected boolean orientate;
-
+    protected Vector vector;
     
-    EffectTask(Task<Origin, Target> task, BiConsumer<Particles, Location> render, Origin origin, Target target, boolean orientate, long iterations) {
+    
+    EffectTask(Task<Task, Origin, Target> task, BiConsumer<Particles, Location> render, Origin origin, Target target, boolean orientate, long iterations) {
         super(iterations);
         this.task = task;
         this.render = render;
@@ -57,12 +58,7 @@ class EffectTask<Origin extends BoundLocation, Target extends BoundLocation> ext
             origin.update();
             target.update();
             if (orientate) {
-                Location origin = this.origin.getLocation();
-                Location target = this.target.getLocation();
-
-                Vector direction = target.toVector().subtract(origin.toVector());
-                origin.setDirection(direction);
-                target.setDirection(direction.multiply(-1));
+                orientate();
             }
             task.render(this);
             
@@ -70,11 +66,34 @@ class EffectTask<Origin extends BoundLocation, Target extends BoundLocation> ext
             done();
         }
     }
-
+    
+    protected void orientate() {
+        Location origin = this.origin.getLocation();
+        Location target = this.target.getLocation();
+        
+        Vector direction = target.toVector().subtract(origin.toVector());
+        
+        origin.setDirection(direction);
+        target.setDirection(direction.multiply(-1));
+    }
+    
+    
+    public Task<Task, Origin, Target> getTask() {
+        return task;
+    }
     
     @Override
     public void render(Particles particles, Location location) {
         render.accept(particles, location);
+    }
+    
+    @Override
+    public Vector getVector() {
+        if (vector == null) {
+            vector = new Vector();
+        }
+        
+        return vector;
     }
 
     @Override

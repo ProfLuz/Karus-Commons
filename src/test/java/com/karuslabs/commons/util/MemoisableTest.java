@@ -21,26 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.util.function;
-
-import java.util.function.Function;
+package com.karuslabs.commons.util;
 
 
-@FunctionalInterface
-public interface CheckedFunction<T, R, E extends Exception> {
+import org.junit.jupiter.api.*;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+
+
+@TestInstance(PER_CLASS)
+public class MemoisableTest {
     
-    public R apply(T t) throws E;
+    @Test
+    public void memoise() {
+        Memoisable object = new Memoisable() {};
+        assertSame(object, Memoisable.memoise(object).get());
+    }
     
-    
-    public static <T, R, E extends Exception> Function<T, R> uncheck(CheckedFunction<T, R, E> function) {
-        return t -> {
-            try {
-                return function.apply(t);
-                
-            } catch (Exception e) {
-                throw new UncheckedFunctionException(e);
-            }
-        };
+    @Test
+    public void memoiseUnchecked() {
+        Object object = new Object();
+        assertSame(object, Memoisable.memoiseUnchecked(object).get());
     }
     
 }

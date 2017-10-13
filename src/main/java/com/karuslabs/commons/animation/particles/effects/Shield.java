@@ -21,55 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.animation.particles.tasks;
+package com.karuslabs.commons.animation.particles.effects;
 
 import com.karuslabs.commons.animation.particles.Particles;
 import com.karuslabs.commons.animation.particles.effect.*;
 import com.karuslabs.commons.world.BoundLocation;
 
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 
-import static java.lang.Math.*;
+import static com.karuslabs.commons.world.Vectors.random;
+import static java.lang.Math.abs;
 
 
-public class Helix implements MemoisableTask<BoundLocation, BoundLocation> {
+public class Shield implements Task<Shield, BoundLocation, BoundLocation> {
     
     private Particles particles;
-    private int strands;
-    private float radius;
-    private float curve;
-    private double rotation;
+    public int perIteration;
+    public int radius;
+    public boolean sphere;
     
     
-    public Helix() {
-        this(8, 10, 10, PI / 4);
+    public Shield(Particles particles) {
+        this(particles, 50, 3, false);
     }
     
-    public Helix(int strands, float radius, float curve, double rotation) {
-        this.strands = strands;
+    public Shield(Particles particles, int perIteration, int radius, boolean sphere) {
+        this.particles = particles;
+        this.perIteration = perIteration;
         this.radius = radius;
-        this.curve = curve;
-        this.rotation = rotation;
+        this.sphere = sphere;
     }
     
     
     @Override
     public void render(Context<BoundLocation, BoundLocation> context) {
         Location location = context.getOrigin().getLocation();
-        int amount = particles.getAmount();
-
-        for (int i = 1; i <= strands; i++) {
-            for (int j = 1; j <= amount; j++) {
-                float ratio = (float) j / amount;
-                double angle = curve * ratio * 2 * PI / strands + (2 * PI * i / strands) + rotation;
-                double x = cos(angle) * ratio * radius;
-                double z = sin(angle) * ratio * radius;
-                
-                location.add(x, 0, z);
-                context.render(particles, location);
-                location.subtract(x, 0, z);
+        Vector vector = context.getVector();
+        
+        for (int i = 0; i < perIteration; i += particles.getAmount()) {
+            random(vector).multiply(radius);
+            if (!sphere) {
+                vector.setY(abs(vector.getY()));
             }
+            
+            context.render(particles, location, vector);
         }
+    }
+
+    @Override
+    public Shield get() {
+        return this;
     }
     
 }

@@ -21,51 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.world;
+package com.karuslabs.commons.animation.particles.effects;
+
+import com.karuslabs.commons.animation.particles.Particles;
+import com.karuslabs.commons.animation.particles.effect.*;
+import com.karuslabs.commons.world.BoundLocation;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static com.karuslabs.commons.world.Vectors.randomCircle;
 
 
-public class StaticLocationTest {
+public class Flame implements Task<Flame, BoundLocation, BoundLocation> {
     
-    private Location internal;
-    private PathVector offset;
-    private StaticLocation location;
-        
-            
-    public StaticLocationTest() {
-        internal = mock(Location.class);
-        when(internal.getYaw()).thenReturn(1F);
-        when(internal.getPitch()).thenReturn(2F);
-        
-        offset = new PathVector(1, 2, 3, 4, 5);
-        
-        location = StaticLocation.builder(internal).offset(offset).build();
+    private Particles flame;
+    private int total;
+    
+    
+    public Flame(Particles flame) {
+        this(flame, 10);
+    }
+    
+    public Flame(Particles flame, int total) {
+        this.flame = flame;
+        this.total = total;
     }
     
     
-    @Test
-    public void validate() {
-        assertTrue(location.validate());
+    @Override
+    public void render(Context<BoundLocation, BoundLocation> context) {
+        Location location = context.getOrigin().getLocation();
+        Vector vector = context.getVector();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        
+        for (int i = 0; i < total; i++) {
+            randomCircle(vector).multiply(random.nextDouble(0, 0.6));
+            vector.setY(random.nextFloat() * 1.8);
+
+            context.render(flame, location, vector);
+        }
     }
-    
-    
-    @ParameterizedTest
-    @CsvSource({"true", "false"})
-    public void updateOffset(boolean relative) {
-        location.setRelative(relative);
-        
-        location.updateOffset();
-        
-        verify(internal).add(relative ? Vectors.rotate(offset, internal) : offset);
+
+
+    @Override
+    public Flame get() {
+        return this;
     }
     
 }

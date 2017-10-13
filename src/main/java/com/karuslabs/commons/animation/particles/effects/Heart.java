@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.karuslabs.commons.animation.particles.tasks;
+package com.karuslabs.commons.animation.particles.effects;
 
 import com.karuslabs.commons.animation.particles.Particles;
 import com.karuslabs.commons.animation.particles.effect.*;
@@ -30,56 +30,60 @@ import com.karuslabs.commons.world.BoundLocation;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
-import static com.karuslabs.commons.world.Vectors.rotateVector;
+import static com.karuslabs.commons.animation.particles.effects.Constants.NONE;
+import static com.karuslabs.commons.world.Vectors.rotate;
 import static java.lang.Math.*;
 
 
-/**
- * @author <a href="http://forums.bukkit.org/members/qukie.90952701/">Qukie</a>
- */
-public class AnimatedBall implements MemoisableTask<BoundLocation, BoundLocation> {
+public class Heart implements Task<Heart, BoundLocation, BoundLocation> {
     
     private Particles particles;
-    private int total = 150;
     private int perIteration;
-    private float size = 1F;
-    private Vector factor;
-    private Vector offset;
     private Vector rotation;
+    private double xFactor;
+    private double yFactor;
+    private double spike;
+    private double yFactorCompression;
+    private float compilation;
     
     
-    public AnimatedBall(Particles particles) {
-        this(particles, 150, 10, 1F, new Vector(1, 2, 1), new Vector(0, 0.8, 0), new Vector(0, 0, 0));
+    public Heart(Particles particles) {
+        this(particles, 50, NONE, 1, 1, 0.8, 2, 2F);
     }
     
-    public AnimatedBall(Particles particles, int total, int perIteration, float size, Vector factor, Vector offset, Vector rotation) {
+    public Heart(Particles particles, int perIteration, Vector rotation, double xFactor, double yFactor, double spike, double yFactorCompression, float compilation) {
         this.particles = particles;
-        this.total = total;
-        this.size = size;
-        this.factor = factor;
-        this.offset = offset;
+        this.perIteration = perIteration;
         this.rotation = rotation;
+        this.xFactor = xFactor;
+        this.yFactor = yFactor;
+        this.spike = spike;
+        this.yFactorCompression = yFactorCompression;
+        this.compilation = compilation;
     }
     
     
     @Override
     public void render(Context<BoundLocation, BoundLocation> context) {
-        Vector vector = new Vector();
         Location location = context.getOrigin().getLocation();
+        Vector vector = context.getVector();
+        
         for (int i = 0; i < perIteration; i += particles.getAmount()) {
-            float t = (float) (PI / total) * context.getCurrent();
-            float r = (float) sin(t) * size;
-            float s = (float) (2 * PI * t);
+            double alpha = PI / compilation / perIteration * i;
+            double phi = pow(abs(sin(2 * compilation * alpha)) + spike * abs(sin(compilation * alpha)), 1 / yFactorCompression);
 
-            vector.setX(factor.getX() * r * cos(s) + offset.getX());
-            vector.setZ(factor.getY() * r * sin(s) + offset.getY());
-            vector.setY(factor.getZ() * size * cos(t) + offset.getZ());
+            vector.setY(phi * (sin(alpha) + cos(alpha)) * yFactor);
+            vector.setZ(phi * (cos(alpha) - sin(alpha)) * xFactor);
 
-            rotateVector(vector, rotation.getX(), rotation.getY(), rotation.getZ());
+            rotate(vector, rotation);
 
-            context.render(particles, location.add(vector));
-            location.subtract(vector);
+            context.render(particles, location, vector);
         }
+    }
+
+    @Override
+    public Heart get() {
+        return this;
     }
     
 }
